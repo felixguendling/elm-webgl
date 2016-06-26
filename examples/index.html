@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <title>Test</title>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <style>
+    html, body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript" src="elm.js"></script>
+  <script type="text/javascript">
+  var app = Elm.Main.fullscreen();
+
+  var ports =
+    { 'mousedown': app.ports.mouseDown
+    , 'mouseup': app.ports.mouseUp
+    , 'mouseout': app.ports.mouseUp
+    , 'mousemove': app.ports.mouseMove };
+
+  document.addEventListener('elmgl-init', function(e) {
+    var canvas = e.detail.canvas;
+    var gl = e.detail.gl;
+
+    var sendTelemetry = function(eventType) {
+      return function(e) {
+        var pixels = new Uint8Array(1 * 1 * 4);
+        gl.readPixels(e.clientX, gl.drawingBufferHeight - e.clientY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        ports[eventType].send(
+          { x: e.clientX
+          , y: e.clientY
+          , color: pixels[0]
+          });
+      };
+    };
+
+    var register = function(eventType) {
+      canvas.addEventListener(eventType, sendTelemetry(eventType));
+    };
+
+    for (var port in ports) {
+      register(port);
+    }
+  });
+  </script>
+</body>
+</html>

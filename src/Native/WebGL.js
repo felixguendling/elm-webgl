@@ -505,8 +505,11 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
   function renderCanvas(model) {
 
     LOG("Render canvas");
+    var opt = { preserveDrawingBuffer: true };
 	  var canvas = document.createElement('canvas');
-    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    var gl = canvas.getContext('webgl', opt) || canvas.getContext('experimental-webgl', opt);
+
+    document.dispatchEvent(new CustomEvent('elmgl-init', {detail: { canvas, gl }}));
 
     if (gl) {
       A2(List.map, function(functionCall){
