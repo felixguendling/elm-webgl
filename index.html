@@ -22,19 +22,29 @@
     , 'mouseout': app.ports.mouseUp
     , 'mousemove': app.ports.mouseMove };
 
-  document.addEventListener('elmgl-init', function(e) {
+  var model = null;
+  document.addEventListener('elmgl-update', e => {
+    model = e.detail.newModel;
+  });
+
+  document.addEventListener('elmgl-init', e => {
     var canvas = e.detail.canvas;
     var gl = e.detail.gl;
+    var render = e.detail.render;
 
-    var sendTelemetry = function(eventType) {
-      return function(e) {
-        var pixels = new Uint8Array(1 * 1 * 4);
-        gl.readPixels(e.clientX, gl.drawingBufferHeight - e.clientY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-        ports[eventType].send(
-          { x: e.clientX
-          , y: e.clientY
-          , color: pixels[0]
-          });
+    var sendTelemetry = eventType => {
+      return e => {
+        if (!model) {
+          console.log("missing model!");
+          return;
+        }
+        render(model, e.clientX, e.clientY, color => {
+          ports[eventType].send(
+            { x: e.clientX
+            , y: e.clientY
+            , color: color
+            });
+        });
       };
     };
 

@@ -9273,7 +9273,6 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
   }
 
   function loadTexture(source) {
-
     return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback){
       var img = new Image();
       img.onload = function() {
@@ -9300,9 +9299,7 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
   }
 
   function textureSize(texture) {
-
     return Utils.Tuple2(texture.img.width, texture.img.height);
-
   }
 
   function render(vert, frag, buffer, uniforms, functionCalls) {
@@ -9322,7 +9319,6 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
   }
 
   function do_texture (gl, texture) {
-
     var tex = gl.createTexture();
     LOG("Created texture");
     gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -9339,13 +9335,10 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
         break;
     };
     gl.generateMipmap(gl.TEXTURE_2D);
-    //gl.bindTexture(gl.TEXTURE0, null);
     return tex;
-
   }
 
   function do_compile (gl, src, tipe) {
-
     var shader = gl.createShader(tipe);
     LOG("Created shader");
 
@@ -9357,11 +9350,9 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     }
 
     return shader;
-
   }
 
   function do_link (gl, vshader, fshader) {
-
     var program = gl.createProgram();
     LOG("Created program");
 
@@ -9373,33 +9364,32 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     }
 
     return program;
-
-	}
+  }
 
   function get_render_info(gl, render_type) {
-	switch(render_type) {
-		case 'Triangle': return { mode: gl.TRIANGLES, elemSize: 3 };
-		case 'LineStrip' : return { mode: gl.LINE_STRIP, elemSize: 1 };
-		case 'LineLoop' : return { mode: gl.LINE_LOOP, elemSize: 1 };
-		case 'Points' : return { mode: gl.POINTS, elemSize: 1 };
-		case 'Lines': return { mode: gl.LINES, elemSize: 2 };
-		case 'TriangleStrip': return { mode: gl.TRIANGLE_STRIP, elemSize: 1 };
-		case 'TriangleFan': return { mode: gl.TRIANGLE_FAN, elemSize: 1 };
-	}
+    switch(render_type) {
+      case 'Triangle': return { mode: gl.TRIANGLES, elemSize: 3 };
+      case 'LineStrip' : return { mode: gl.LINE_STRIP, elemSize: 1 };
+      case 'LineLoop' : return { mode: gl.LINE_LOOP, elemSize: 1 };
+      case 'Points' : return { mode: gl.POINTS, elemSize: 1 };
+      case 'Lines': return { mode: gl.LINES, elemSize: 2 };
+      case 'TriangleStrip': return { mode: gl.TRIANGLE_STRIP, elemSize: 1 };
+      case 'TriangleFan': return { mode: gl.TRIANGLE_FAN, elemSize: 1 };
+    }
   };
 
   function get_attribute_info(gl, type) {
-		switch(type) {
-			case gl.FLOAT:      return { size: 1, type: Float32Array, baseType: gl.FLOAT };
-			case gl.FLOAT_VEC2: return { size: 2, type: Float32Array, baseType: gl.FLOAT };
-			case gl.FLOAT_VEC3: return { size: 3, type: Float32Array, baseType: gl.FLOAT };
-			case gl.FLOAT_VEC4: return { size: 4, type: Float32Array, baseType: gl.FLOAT };
-			case gl.INT: 		return { size: 1, type: Int32Array, baseType: gl.INT };
-			case gl.INT_VEC2: 	return { size: 2, type: Int32Array, baseType: gl.INT };
-			case gl.INT_VEC3: 	return { size: 3, type: Int32Array, baseType: gl.INT };
-			case gl.INT_VEC4: 	return { size: 4, type: Int32Array, baseType: gl.INT };
-		}
-	  };
+    switch(type) {
+      case gl.FLOAT:      return { size: 1, type: Float32Array, baseType: gl.FLOAT };
+      case gl.FLOAT_VEC2: return { size: 2, type: Float32Array, baseType: gl.FLOAT };
+      case gl.FLOAT_VEC3: return { size: 3, type: Float32Array, baseType: gl.FLOAT };
+      case gl.FLOAT_VEC4: return { size: 4, type: Float32Array, baseType: gl.FLOAT };
+      case gl.INT:     return { size: 1, type: Int32Array, baseType: gl.INT };
+      case gl.INT_VEC2:   return { size: 2, type: Int32Array, baseType: gl.INT };
+      case gl.INT_VEC3:   return { size: 3, type: Int32Array, baseType: gl.INT };
+      case gl.INT_VEC4:   return { size: 4, type: Int32Array, baseType: gl.INT };
+    }
+  };
 
   /**
         Form the buffer for a given attribute.
@@ -9411,19 +9401,21 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
         @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode.
             ie, 2 for Lines, 3 for Triangles, etc.
   */
-  function do_bind_attribute (gl, attribute, bufferElems, elem_length) {
+  function do_bind_attribute(gl, attribute, bufferElems, elem_length) {
     var idxKeys = [];
     for(var i = 0;i < elem_length;i++) idxKeys.push('_'+i);
 
     function dataFill(data, cnt, fillOffset, elem, key) {
-        if(elem_length == 1)
+      if(elem_length == 1) {
+        for(var i = 0; i < cnt; i++) {
+          data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];
+        }
+      } else {
+        idxKeys.forEach( function(idx) {
             for(var i = 0;i < cnt;i++)
-                data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];
-        else
-            idxKeys.forEach( function(idx) {
-                for(var i = 0;i < cnt;i++)
-                    data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);
-            });
+                data[fillOffset++] = (cnt === 1 ? elem[idx][key] : elem[idx][key][i]);
+        });
+      }
     };
 
     var attributeInfo = get_attribute_info(gl, attribute.type);
@@ -9460,8 +9452,8 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     @param elem_length The length of the number of vertices that complete one 'thing' based on the drawing mode.
             ie, 2 for Lines, 3 for Triangles, etc.
   */
-  function do_bind_setup (gl, bufferElems, elem_length) {
-	var buffers = {};
+  function do_bind_setup(gl, bufferElems, elem_length) {
+    var buffers = {};
 
     var numIndices = elem_length * List.length(bufferElems);
     var indices = new Uint16Array(numIndices);
@@ -9480,17 +9472,19 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     };
 
     return bufferObject;
-
   }
 
-  function getProgID (vertID, fragID) {
-    return vertID + '#' + fragID;
+  var mode = "";
+  function getProgID(vertID, fragID) {
+    return mode + "#" + vertID + '#' + fragID;
   }
 
-  function drawGL(domNode, data) {
-
+  function drawGL(domNode, data, pickX, pickY, callback) {
     var model = data.model;
     var gl = model.cache.gl;
+
+    document.dispatchEvent(new CustomEvent('elmgl-update',
+      { detail: { newModel: model } }));
 
     if (!gl) return domNode;
 
@@ -9500,7 +9494,7 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
 
     function drawEntity(render) {
       if(List.length(render.buffer._0) === 0)
-          return;
+      	return;
 
       var progid
       var program;
@@ -9510,7 +9504,6 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
       }
 
       if (!program) {
-
         var vshader = undefined;
         if (render.vert.id) {
           vshader = model.cache.shaders[render.vert.id];
@@ -9538,7 +9531,6 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
         program = do_link(gl, vshader, fshader);
         progid = getProgID(render.vert.id, render.frag.id);
         model.cache.programs[progid] = program;
-
       }
 
       gl.useProgram(program);
@@ -9552,7 +9544,7 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
 
       setUniforms(setters, render.uniforms);
 
-	  var renderType = get_render_info(gl, render.buffer.ctor);
+      var renderType = get_render_info(gl, render.buffer.ctor);
       var buffer = model.cache.buffers[render.buffer.guid];
 
       if (!buffer) {
@@ -9573,7 +9565,7 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
         gl.enableVertexAttribArray(attribLocation);
 
         if(buffer.buffers[attribute.name] === undefined) {
-            buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, render.buffer._0, renderType.elemSize);
+        	buffer.buffers[attribute.name] = do_bind_attribute (gl, attribute, render.buffer._0, renderType.elemSize);
         }
         var attributeBuffer = buffer.buffers[attribute.name];
         var attributeInfo = get_attribute_info(gl, attribute.type);
@@ -9585,11 +9577,27 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
         gl.bindBuffer(gl.ARRAY_BUFFER, attributeBuffer);
         gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
       }
-      gl.drawElements(renderType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
 
+      gl.drawElements(renderType.mode, numIndices, gl.UNSIGNED_SHORT, 0);
     }
 
+    mode = "on-screen";
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     A2(List.map, drawEntity, model.renderables);
+
+    if (pickX && pickY && callback) {
+      mode = "off-screen";
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, model.cache.framebuffer);
+      A2(List.map, drawEntity, model.offscreenRenderables);
+
+      var pixels = new Uint8Array(1 * 1 * 4);
+      gl.readPixels(pickX, gl.drawingBufferHeight - pickY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+      callback(pixels[0]);
+    }
+
+
     return domNode;
   }
 
@@ -9739,30 +9747,28 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
 
   // VIRTUAL-DOM WIDGETS
 
-  function toHtml(functionCalls, factList, renderables) {
-  	var model = {
-  		functionCalls: functionCalls,
-  		renderables: renderables,
+  function toHtml(functionCalls, factList, renderables, offscreenRenderables) {
+    var model = {
+      functionCalls: functionCalls,
+      renderables: renderables,
+      offscreenRenderables: offscreenRenderables,
       cache: {}
-  	};
-  	return _elm_lang$virtual_dom$Native_VirtualDom.custom(factList, model, implementation);
+    };
+    return _elm_lang$virtual_dom$Native_VirtualDom.custom(factList, model, implementation);
   }
 
   // WIDGET IMPLEMENTATION
   var implementation = {
-  	render: renderCanvas,
-  	diff: diff
+    render: renderCanvas,
+    diff: diff
   };
 
 
   function renderCanvas(model) {
 
     LOG("Render canvas");
-    var opt = { preserveDrawingBuffer: true };
-	  var canvas = document.createElement('canvas');
-    var gl = canvas.getContext('webgl', opt) || canvas.getContext('experimental-webgl', opt);
-
-    document.dispatchEvent(new CustomEvent('elmgl-init', {detail: { canvas, gl }}));
+    var canvas = document.createElement('canvas');
+    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
     if (gl) {
       A2(List.map, function(functionCall){
@@ -9781,11 +9787,42 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     model.cache.buffers = [];
     model.cache.textures = [];
 
+    var width = 500;
+    var height = 500;
+	
+    model.cache.texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, model.cache.texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+    model.cache.renderbuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, model.cache.renderbuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+    model.cache.framebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, model.cache.framebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, model.cache.texture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, model.cache.renderbuffer);
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    document.dispatchEvent(new CustomEvent('elmgl-init',
+      { detail: { canvas: canvas
+                , gl: gl
+                , render: function(newModel, pickX, pickY, pickCallback) {
+                    rAF(function() {
+                      drawGL(canvas, {model: newModel}, pickX, pickY, pickCallback);
+                    });
+                  } 
+                }
+      }));
+
     // Render for the first time.
     // This has to be done in animation frame,
     // because the canvas is not in the DOM yet,
     // when renderCanvas is called by virtual-dom
-    rAF(function () {
+    rAF(function() {
       drawGL(canvas, {model: model});
     });
 
@@ -9796,9 +9833,9 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
   function diff(oldModel, newModel) {
     newModel.model.cache = oldModel.model.cache;
     return {
-  		applyPatch: drawGL,
-  		data: newModel
-  	};
+      applyPatch: drawGL,
+      data: newModel
+    };
   }
 
   return {
@@ -9806,7 +9843,7 @@ var _elm_community$elm_webgl$Native_WebGL = function() {
     textureSize:textureSize,
     loadTexture:loadTexture,
     render:F5(render),
-    toHtml:F3(toHtml),
+    toHtml:F4(toHtml),
     enable:enable,
     disable:disable,
     blendColor:F4(blendColor),
@@ -10135,7 +10172,9 @@ var _elm_community$elm_webgl$WebGL$Replace = {ctor: 'Replace'};
 var _elm_community$elm_webgl$WebGL$None = {ctor: 'None'};
 var _elm_community$elm_webgl$WebGL$Keep = {ctor: 'Keep'};
 
-var _elm_community$elm_webgl$Main$fragmentShader = {'src': '\nprecision mediump float;\nvarying vec3 vcolor;\nvoid main () {\n    gl_FragColor = vec4(vcolor, 1);\n}\n'};
+var _elm_community$elm_webgl$Main$offscreenFragmentShader = {'src': '\nprecision mediump float;\nvarying vec3 vcolor;\nvoid main () {\n    gl_FragColor = vec4(vcolor, 1);\n}\n'};
+var _elm_community$elm_webgl$Main$fragmentShader = {'src': '\nprecision mediump float;\nvarying vec3 vcolor;\nvoid main () {\n    gl_FragColor = vec4(vec3(0, 0, 1), 1);\n}\n'};
+var _elm_community$elm_webgl$Main$offscreenVertexShader = {'src': '\nattribute vec3 coordinate;\nattribute vec3 color;\nuniform mat4 perspective;\nvarying vec3 vcolor;\n\nvoid main() {\n    gl_Position = perspective * vec4(coordinate, 1.0);\n    vcolor = color;\n}\n'};
 var _elm_community$elm_webgl$Main$vertexShader = {'src': '\nattribute vec3 coordinate;\nattribute vec3 color;\nuniform mat4 perspective;\nvarying vec3 vcolor;\n\nvoid main() {\n    gl_Position = perspective * vec4(coordinate, 1.0);\n    vcolor = color;\n}\n'};
 var _elm_community$elm_webgl$Main$updateDrag = F2(
 	function (s, drag) {
@@ -10255,7 +10294,23 @@ var _elm_community$elm_webgl$Main$mesh = function (model) {
 			A2(_elm_lang$core$List$map, _elm_community$elm_webgl$Main$render, model.boxes)));
 };
 var _elm_community$elm_webgl$Main$view = function (model) {
-	return A2(
+	var offScreenRenderable = A4(
+		_elm_community$elm_webgl$WebGL$render,
+		_elm_community$elm_webgl$Main$offscreenVertexShader,
+		_elm_community$elm_webgl$Main$offscreenFragmentShader,
+		_elm_community$elm_webgl$Main$mesh(model),
+		{
+			perspective: A4(_elm_community$elm_linear_algebra$Math_Matrix4$makeOrtho2D, 0.0, _elm_community$elm_webgl$Main$w, _elm_community$elm_webgl$Main$h, 0.0)
+		});
+	var renderable = A4(
+		_elm_community$elm_webgl$WebGL$render,
+		_elm_community$elm_webgl$Main$vertexShader,
+		_elm_community$elm_webgl$Main$fragmentShader,
+		_elm_community$elm_webgl$Main$mesh(model),
+		{
+			perspective: A4(_elm_community$elm_linear_algebra$Math_Matrix4$makeOrtho2D, 0.0, _elm_community$elm_webgl$Main$w, _elm_community$elm_webgl$Main$h, 0.0)
+		});
+	return A3(
 		_elm_community$elm_webgl$WebGL$toHtml,
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -10272,16 +10327,9 @@ var _elm_community$elm_webgl$Main$view = function (model) {
 					]))
 			]),
 		_elm_lang$core$Native_List.fromArray(
-			[
-				A4(
-				_elm_community$elm_webgl$WebGL$render,
-				_elm_community$elm_webgl$Main$vertexShader,
-				_elm_community$elm_webgl$Main$fragmentShader,
-				_elm_community$elm_webgl$Main$mesh(model),
-				{
-					perspective: A4(_elm_community$elm_linear_algebra$Math_Matrix4$makeOrtho2D, 0.0, _elm_community$elm_webgl$Main$w, _elm_community$elm_webgl$Main$h, 0.0)
-				})
-			]));
+			[renderable]),
+		_elm_lang$core$Native_List.fromArray(
+			[offScreenRenderable]));
 };
 var _elm_community$elm_webgl$Main$finishDrag = F2(
 	function (s, box) {
