@@ -148,7 +148,7 @@ defaultConfiguration =
 {-| Same as toHtmlWith but with default configurations,
 implicitly configured for you. See `defaultConfiguration` for more information.
 -}
-toHtml : List (Attribute msg) -> List Renderable -> Html msg
+toHtml : List (Attribute msg) -> List Renderable -> List Renderable -> Html msg
 toHtml =
   toHtmlWith defaultConfiguration
 
@@ -157,7 +157,7 @@ toHtml =
 meshes are cached so that they do not get resent to the GPU, so it should be
 relatively cheap to create new entities out of existing values.
 -}
-toHtmlWith : List FunctionCall -> List (Attribute msg) -> List Renderable -> Html msg
+toHtmlWith : List FunctionCall -> List (Attribute msg) -> List Renderable -> List Renderable -> Html msg
 toHtmlWith functionCalls =
   Native.WebGL.toHtml (computeAPICalls functionCalls)
 

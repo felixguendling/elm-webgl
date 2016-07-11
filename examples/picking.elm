@@ -215,24 +215,33 @@ finishDrag s box =
 
 view : Model -> Html Msg
 view model =
-    WebGL.toHtml
-        [ width w
-        , height h
-        , style
-            [ ( "cursor"
-              , if model.hover then
-                    "pointer"
-                else
-                    "default"
-              )
-            ]
-        ]
-        [ WebGL.render vertexShader
-            fragmentShader
-            (mesh model)
-            { perspective = makeOrtho2D 0.0 w h 0.0 }
-        ]
+    let
+        renderable =
+            WebGL.render vertexShader
+                fragmentShader
+                (mesh model)
+                { perspective = makeOrtho2D 0.0 w h 0.0 }
 
+        offScreenRenderable =
+            WebGL.render offscreenVertexShader
+                offscreenFragmentShader
+                (mesh model)
+                { perspective = makeOrtho2D 0.0 w h 0.0 }
+    in
+        WebGL.toHtml
+            [ width w
+            , height h
+            , style
+                [ ( "cursor"
+                  , if model.hover then
+                        "pointer"
+                    else
+                        "default"
+                  )
+                ]
+            ]
+            [ renderable ]
+            [ offScreenRenderable ]
 
 vertexShader : WebGL.Shader { attr | coordinate : Vec3, color : Vec3 } { unif | perspective : Mat4 } { vcolor : Vec3 }
 vertexShader =
@@ -248,9 +257,33 @@ void main() {
 }
 |]
 
+offscreenVertexShader : WebGL.Shader { attr | coordinate : Vec3, color : Vec3 } { unif | perspective : Mat4 } { vcolor : Vec3 }
+offscreenVertexShader =
+    [glsl|
+attribute vec3 coordinate;
+attribute vec3 color;
+uniform mat4 perspective;
+varying vec3 vcolor;
+
+void main() {
+    gl_Position = perspective * vec4(coordinate, 1.0);
+    vcolor = color;
+}
+|]
 
 fragmentShader : WebGL.Shader {} u { vcolor : Vec3 }
 fragmentShader =
+    [glsl|
+precision mediump float;
+varying vec3 vcolor;
+void main () {
+    gl_FragColor = vec4(vec3(0, 0, 1), 1);
+}
+|]
+
+
+offscreenFragmentShader : WebGL.Shader {} u { vcolor : Vec3 }
+offscreenFragmentShader =
     [glsl|
 precision mediump float;
 varying vec3 vcolor;
